@@ -6,14 +6,19 @@ from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import Driver, Car, Manufacturer
-from .forms import DriverCreationForm, DriverLicenseUpdateForm, CarForm, DriverSearchForm, CarSearchForm, \
-    ManufacturerSearchForm
+from .forms import (
+    DriverCreationForm,
+    DriverLicenseUpdateForm,
+    CarForm,
+    DriverSearchForm,
+    CarSearchForm,
+    ManufacturerSearchForm,
+)
 
 
 @login_required
 def index(request):
     """View function for the home page of the site."""
-
     num_drivers = Driver.objects.count()
     num_cars = Car.objects.count()
     num_manufacturers = Manufacturer.objects.count()
@@ -38,10 +43,8 @@ class ManufacturerListView(LoginRequiredMixin, generic.ListView):
     template_name = "taxi/manufacturer_list.html"
     paginate_by = 5
 
-    def get_context_data(
-        self, *, object_list = ..., **kwargs
-    ):
-        context = super(ManufacturerListView, self).get_context_data(**kwargs)
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
         context["search_form"] = ManufacturerSearchForm()
         return context
 
@@ -50,7 +53,6 @@ class ManufacturerListView(LoginRequiredMixin, generic.ListView):
         if name:
             return self.queryset.filter(name__icontains=name)
         return self.queryset
-
 
 
 class ManufacturerCreateView(LoginRequiredMixin, generic.CreateView):
@@ -75,10 +77,8 @@ class CarListView(LoginRequiredMixin, generic.ListView):
     paginate_by = 5
     queryset = Car.objects.select_related("manufacturer")
 
-    def get_context_data(
-        self, *, object_list = ..., **kwargs
-    ):
-        context = super(CarListView, self).get_context_data(**kwargs)
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
         context["search_form"] = CarSearchForm()
         return context
 
@@ -115,10 +115,8 @@ class DriverListView(LoginRequiredMixin, generic.ListView):
     queryset = Driver.objects.all()
     paginate_by = 5
 
-    def get_context_data(
-        self, *, object_list = ..., **kwargs
-    ):
-        context = super(DriverListView, self).get_context_data(**kwargs)
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
         context["search_form"] = DriverSearchForm()
         return context
 
@@ -147,15 +145,15 @@ class DriverLicenseUpdateView(LoginRequiredMixin, generic.UpdateView):
 
 class DriverDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = Driver
-    success_url = reverse_lazy("")
+    success_url = reverse_lazy("taxi:driver-list")
 
 
 @login_required
 def toggle_assign_to_car(request, pk):
     driver = Driver.objects.get(id=request.user.id)
-    if (
-        Car.objects.get(id=pk) in driver.cars.all()
-    ):  # probably could check if car exists
+    car = Car.objects.get(id=pk)
+
+    if car in driver.cars.all():
         driver.cars.remove(pk)
     else:
         driver.cars.add(pk)
