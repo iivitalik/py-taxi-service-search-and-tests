@@ -10,7 +10,7 @@ URL_TAXI = reverse("taxi:car-list")
 class PublicTaxiTests(TestCase):
     def test_login_required(self):
         res = self.client.get(URL_TAXI)
-        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.status_code, 302)
 
 
 class PrivateTaxiTests(TestCase):
@@ -27,4 +27,4 @@ class PrivateTaxiTests(TestCase):
         response = self.client.get(URL_TAXI)
         self.assertEqual(response.status_code, 200)
         taxi = Car.objects.all()
-        self.assertEqual(response.context["car-list "], taxi)
+        self.assertEqual(response.context["car_list "], taxi)
